@@ -3,10 +3,7 @@ from django.db import models
 from account.models import CustomUser
 # Create your models here.
 
-class comment(models.Model):
-    comment_text = models.CharField(max_length=500)
-    created_by = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+
 
 
 
@@ -15,7 +12,20 @@ class posts(models.Model):
     content = models.CharField(max_length=10000)
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    comment = models.ManyToManyField(comment)
+    # comment = models.ManyToManyField(comment)
+
+class comment(models.Model):
+    comment_text = models.CharField(max_length=500)
+    created_by = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    ofpost = models.ForeignKey(posts,on_delete=models.CASCADE)
+    
+    
+    @property
+    def comments(self):
+        instance = self
+        qs = comment.objects.filter(parent=instance)
+        return qs
     
     
 
