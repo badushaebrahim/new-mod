@@ -17,10 +17,9 @@ class postserializer(serializers.ModelSerializer):
             'title',
             'content',
             'created_at',
-            'user',
             'comments'
         ]
-        depth =2
+        # depth =1
     def get_comments(self, obj):
         qs = comment.objects.all().filter(ofpost=obj)
         print(type(qs))
@@ -30,7 +29,22 @@ class postserializer(serializers.ModelSerializer):
 
 
 
-# class commentserializer(serializers.models):
-#     class Meta:
-#         model = comment
-#         fields = ['comment_text','created_by','created_at']
+class createpostserializer(serializers.ModelSerializer):
+    class Meta:
+        model =  posts
+        fields = [
+            'title',
+            'content',
+            'user'
+        ]
+
+class postserializer_byid(serializers.ModelSerializer):
+    comments = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = posts
+        fields = [
+            'title',
+            'content',
+            'created_at',
+            'user'
+        ]

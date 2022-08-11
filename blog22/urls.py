@@ -17,7 +17,7 @@ from django.urls import path
 from rest_framework.authtoken import views
 from account.views import CustomAuthToken,user_Register,test_auth,user_crud
 from django.contrib import admin
-from post.views import get_all_post
+from post.views import get_all_post,add_new_post
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('apia/', views.obtain_auth_token),
@@ -25,5 +25,6 @@ urlpatterns = [
     path('usereg/', user_Register.as_view()),
     path('tes/',test_auth),
     path('user/<int:id>',user_crud.as_view()),
-    path('home2/',get_all_post)
+    path('home2/',get_all_post),
+    path('addpost/',add_new_post)
 ]
