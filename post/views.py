@@ -179,11 +179,17 @@ def make_comment(request):
         try:
             k= CustomUser.objects.get(pk =request.data["user"])
             ser =  loginserializer(k)
-            
-            if str(request.user) == ser.data["first_name"]:
-                if newcommentserial.is_valid():
-                    newcommentserial.save()
-                pass
+            try:
+                postobj = posts.get(pk = request.data["ofpost"])
+                postser = postserializer(postobj)
+                if postser.is_valid():
+                    if str(request.user) == ser.data["first_name"]:
+                        if newcommentserial.is_valid():
+                            newcommentserial.save()
+                        pass
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            except posts.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
         except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
