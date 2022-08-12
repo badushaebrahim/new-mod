@@ -31,8 +31,6 @@ class CustomAuthToken(ObtainAuthToken):
         logz.info("serializing data")
         token, created = Token.objects.get_or_create(user=userdatas)
         logz.info("token created or get and sent")
-
-        print("-------------------------------------")
         data= {
             'token': token.key,
             'user_id':serializer.data["id"]
