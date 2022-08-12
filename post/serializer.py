@@ -45,6 +45,5 @@ class postserializer_byid(serializers.ModelSerializer):
         fields = [
             'title',
             'content',
-            'created_at',
             'user'
         ]

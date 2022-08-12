@@ -25,7 +25,7 @@ def get_all_post(request):
         return Response(postserial.data,status=status.HTTP_200_OK)
 
 '''
-mycontent with userid
+mycontent with userid and only content i created
 '''
 
 @api_view(['GET'])
@@ -35,8 +35,16 @@ def my_content(request,id):
     if request.method == 'GET':
         try:
             postdata = posts.objects.all().filter(user=id)
-            postserial = postserializer(postdata,many=True)
-            return Response(postserial.data,status=status.HTTP_200_OK)
+            try:
+                userdata = CustomUser.objects.get(pk = id)
+                userserial = loginserializer(userdata)
+                if str(request.user) == str(userserial.data["first_name"]):
+
+                    postserial = postserializer(postdata,many=True)
+                    return Response(postserial.data,status=status.HTTP_200_OK)
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            except CustomUser.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
         except posts.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -51,14 +59,17 @@ to create post if you are a logedin user
 def add_new_post(request):
     if request.method == 'POST':
         newpostserial = createpostserializer(data= request.data)
-        k= CustomUser.objects.get(pk =request.data["user"])
-        ser =  loginserializer(k)
-        if str(request.user) == ser.data["first_name"]:
-            if newpostserial.is_valid():
-                newpostserial.save()
-                return Response(newpostserial.data,status=status.HTTP_201_CREATED)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_403_FORBIDDEN)
+        try:
+            k= CustomUser.objects.get(pk =request.data["user"])
+            ser =  loginserializer(k)
+            if str(request.user) == ser.data["first_name"]:
+                if newpostserial.is_valid():
+                    newpostserial.save()
+                    return Response(newpostserial.data,status=status.HTTP_201_CREATED)
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        except CustomUser.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -108,7 +119,9 @@ def get_seriallizer_of_post(id,request):
     try:
         postdata = posts.objects.get(pk=id)
         serial  =  postserializer_byid(postdata)
-        userdata= CustomUser.objects.get(pk = serial.data["user"])
+        print(serial.data)
+        print("mine",serial.data["user"])
+        userdata= CustomUser.objects.get(id = int(serial.data["user"]))
         userserial = loginserializer(userdata)
         if str(request.user) == userserial.data["first_name"]:
             return serial,False
