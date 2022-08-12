@@ -1,3 +1,4 @@
+from asyncio import new_event_loop
 from pstats import Stats
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from account.models import CustomUser
 from .models import posts
-from .serializer import postserializer,createpostserializer,postserializer_byid
+from .serializer import commentserializer, postserializer,createpostserializer,postserializer_byid
 from account.serializer import loginserializer
 # Create your views here.
 
@@ -163,3 +164,27 @@ def get_model_of_post(id,request):
 
     except posts.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND),True
+
+
+'''
+create a comment if you are logedin
+'''
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def make_comment(request):
+    if request.method == 'POST':
+        newcommentserial = commentserializer(data= request.data)
+        try:
+            k= CustomUser.objects.get(pk =request.data["user"])
+            ser =  loginserializer(k)
+            
+            if str(request.user) == ser.data["first_name"]:
+                if newcommentserial.is_valid():
+                    newcommentserial.save()
+                pass
+        except CustomUser.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
