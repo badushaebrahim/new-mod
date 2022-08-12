@@ -39,7 +39,7 @@ class createpostserializer(serializers.ModelSerializer):
         ]
 
 class postserializer_byid(serializers.ModelSerializer):
-    comments = serializers.SerializerMethodField(read_only=True)
+    # comments = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = posts
         fields = [

@@ -27,6 +27,6 @@ urlpatterns = [
     path('user/<int:id>',user_crud.as_view()),
     path('home2/',get_all_post),
     path('addpost/',add_new_post),
-    path('mycontent/<int:id>',my_content),
-    path('mypost/<int:id>',post_rud.as_view())
+    path('mycontent/',my_content),
+    path('mycontent/<int:id>',post_rud.as_view())
 ]

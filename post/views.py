@@ -31,21 +31,22 @@ mycontent with userid and only content i created
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def my_content(request,id):
+def my_content(request):
     if request.method == 'GET':
+        print(request.user)
         try:
-            postdata = posts.objects.all().filter(user=id)
+            userdata = CustomUser.objects.get(first_name = request.user)
+            userserial = loginserializer(userdata)
+            # print("user id",userserial.data['id'])
             try:
-                userdata = CustomUser.objects.get(pk = id)
-                userserial = loginserializer(userdata)
+                postdata = posts.objects.all().filter(user=int(userserial.data['id']))
                 if str(request.user) == str(userserial.data["first_name"]):
-
                     postserial = postserializer(postdata,many=True)
                     return Response(postserial.data,status=status.HTTP_200_OK)
                 return Response(status=status.HTTP_403_FORBIDDEN)
-            except CustomUser.DoesNotExist:
+            except posts.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
-        except posts.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -74,9 +75,11 @@ def add_new_post(request):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+
 '''
 class to read , update ,delete post based  on post id 
 '''
+
 
 class post_rud(APIView):
     authentication_classes = [TokenAuthentication]
@@ -95,19 +98,22 @@ class post_rud(APIView):
         if errors == True:
             return serial
         else :
-            ser = postserializer(serial,data=request)
+            ser = postserializer_byid(serial,data=request.data)
             if ser.is_valid():
                 ser.save()
                 return Response(ser.data,status=status.HTTP_200_OK)
+            print("invalid data",ser.error_messages)
             return Response(status= status.HTTP_400_BAD_REQUEST)
 
     def delete(self,request,id,*args,**kwargs):
         errors =False
         serial,errors = get_model_of_post(id,request)
         if errors == True:
-            serial.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        pass
+            return serial
+        
+        serial.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        
 
 
 
@@ -122,11 +128,15 @@ def get_seriallizer_of_post(id,request):
         print(serial.data)
         print("mine",serial.data["user"])
         userdata= CustomUser.objects.get(id = int(serial.data["user"]))
-        userserial = loginserializer(userdata)
-        if str(request.user) == userserial.data["first_name"]:
-            return serial,False
-        print("else")
-        return Response(status=status.HTTP_403_FORBIDDEN),True
+        try:
+            userserial = loginserializer(userdata)
+            if str(request.user) == userserial.data["first_name"]:
+                return serial,False
+            print("else")
+            return Response(status=status.HTTP_403_FORBIDDEN),True
+        except CustomUser.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND),True
+
 
     except posts.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND),True
@@ -141,11 +151,15 @@ def get_model_of_post(id,request):
         postdata = posts.objects.get(pk=id)
         serial  =  postserializer_byid(postdata)
         userdata= CustomUser.objects.get(pk = serial.data["user"])
-        userserial = loginserializer(userdata)
-        if str(request.user) == userserial.data["first_name"]:
-            return postdata,False
-        print("else")
-        return Response(status=status.HTTP_403_FORBIDDEN),True
+        try:
+            userserial = loginserializer(userdata)
+            if str(request.user) == userserial.data["first_name"]:
+                return postdata,False
+            print("else")
+            return Response(status=status.HTTP_403_FORBIDDEN),True
+        except CustomUser.DoesNotExist:
+            print("user not found")
+            return Response(status=status.HTTP_404_NOT_FOUND),True
 
     except posts.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND),True
