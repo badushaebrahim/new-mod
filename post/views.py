@@ -199,7 +199,7 @@ def make_comment(request):
             return Response(loginserializer.error_messages, status=status.HTTP_404_NOT_FOUND)
 
 '''
-comment class to get update and delet comment by the on who created it
+comment class to get update and delet comment by the on who created ito
 '''
 
 
