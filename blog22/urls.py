@@ -16,7 +16,7 @@ Including another URLconf
 from django.urls import path
 from account.views import CustomAuthToken,user_Register,user_crud
 from django.contrib import admin
-from post.views import get_all_post,add_new_post,my_content,post_rud,make_comment
+from post.views import get_all_post,add_new_post,my_content,post_rud,make_comment,commentsclass
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('apia/', views.obtain_auth_token),
@@ -28,5 +28,6 @@ urlpatterns = [
     path('addpost/',add_new_post),
     path('mycontent/',my_content),
     path('mycontent/<int:id>',post_rud.as_view()),
-    path("addcomment/",make_comment)
+    path("addcomment/",make_comment),
+    path("addcomment/<int:id>",commentsclass.as_view())
 ]

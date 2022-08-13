@@ -1,3 +1,4 @@
+from ast import Delete
 from asyncio import new_event_loop
 from pstats import Stats
 from rest_framework.response import Response
@@ -178,7 +179,7 @@ def make_comment(request):
         newcommentserial = commentserializer(data= request.data)
         try:
             print(request.data["created_by"])
-            k= CustomUser.objects.get(pk =request.data["created_by"])
+            k= CustomUser.objects.get(pk=request.data["created_by"])
             ser =  loginserializer(k)
             try:
                 print(request.data["ofpost"])
@@ -188,11 +189,36 @@ def make_comment(request):
                 if str(request.user) == ser.data["first_name"]:
                     if newcommentserial.is_valid():
                         newcommentserial.save()
+                        return Response(newcommentserial.data,status=status.HTTP_200_OK)
+                    # print(newcommentserial.error_messages)
 
                 return Response( newcommentserial.error_messages, status=status.HTTP_400_BAD_REQUEST)
             except posts.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+                return Response(postser.error_messages,status=status.HTTP_404_NOT_FOUND)
         except CustomUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(loginserializer.error_messages, status=status.HTTP_404_NOT_FOUND)
+
+'''
+comment class to get update and delet comment by the on who created it
+'''
+
+
+class commentsclass(APIView):
+    def get(request,id,*args,**kwargs):
+        
+        pass
+    
+    def put(request,id,*args,**kwargs):
+        
+        pass
+    
+    def delete(request,id,*args,**kwargs):
+        
+        pass
+    
+    
+        
+
+
 
 
