@@ -20,14 +20,14 @@ from post.views import get_all_post,add_new_post,my_content,post_rud,make_commen
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('apia/', views.obtain_auth_token),
-    path('apim/', CustomAuthToken.as_view()),
+    path('login/', CustomAuthToken.as_view()),
     path('usereg/', user_Register.as_view()),
-    path('tes/',test_auth),
+    # path('tes/',test_auth),
     path('user/<int:id>',user_crud.as_view()),
     path('home/',get_all_post),
     path('addpost/',add_new_post),
     path('mycontent/',my_content),
     path('mycontent/<int:id>',post_rud.as_view()),
     path("addcomment/",make_comment),
-    path("addcomment/<int:id>",commentsclass.as_view())
+    path("comment/<int:id>",commentsclass.as_view())
 ]

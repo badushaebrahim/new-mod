@@ -1,3 +1,4 @@
+from asyncore import read
 from pyexpat import model
 from rest_framework import serializers
 from .models import posts,comment
@@ -6,6 +7,17 @@ class commentserializer(serializers.ModelSerializer):
     class Meta:
         model = comment
         fields = '__all__'
+
+
+class commentgetserialiser (serializers.ModelSerializer):
+    # post = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = comment
+        fields = ['id','comment_text','ofpost','created_by']
+        
+        # def get_post(self,obj)
+        
 
 
 

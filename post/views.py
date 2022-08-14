@@ -9,8 +9,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from account.models import CustomUser
-from .models import posts
-from .serializer import commentserializer, postserializer,createpostserializer,postserializer_byid
+from .models import comment, posts
+from .serializer import commentserializer, postserializer,createpostserializer,postserializer_byid,commentgetserialiser
 from account.serializer import loginserializer
 # Create your views here.
 
@@ -141,7 +141,7 @@ def get_seriallizer_of_post(id,request):
 
 
     except posts.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND),True
+        return Response("invalid user /user not found",status=status.HTTP_404_NOT_FOUND),True
 
 '''
 function to check if user is owner of the 
@@ -152,8 +152,8 @@ def get_model_of_post(id,request):
     try:
         postdata = posts.objects.get(pk=id)
         serial  =  postserializer_byid(postdata)
-        userdata= CustomUser.objects.get(pk = serial.data["user"])
         try:
+            userdata= CustomUser.objects.get(pk = serial.data["user"])
             userserial = loginserializer(userdata)
             if str(request.user) == userserial.data["first_name"]:
                 return postdata,False
@@ -204,21 +204,77 @@ comment class to get update and delet comment by the on who created ito
 
 
 class commentsclass(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(request,id,*args,**kwargs):
-        
-        pass
+        errors = False
+        serial ,errors = get_serializer_of_commnet(id,request)
+        if errors == True:
+            return serial
+        return Response(serial.data,status=status.HTTP_200_OK)
     
     def put(request,id,*args,**kwargs):
-        
-        pass
+        errors = False
+        serial , errors = get_model_of_comment(id,request)
+        if errors == True:
+            return serial
+        else :
+            ser = commentgetserialiser(serial,data=request.data)
+            if ser.is_valid():
+                ser.save()
+                return Response(ser.data,status=status.HTTP_200_OK)
+            print("invalid data",ser.error_messages)
+            return Response(status= status.HTTP_400_BAD_REQUEST)
     
     def delete(request,id,*args,**kwargs):
+        errors = False
+        serial , errors = get_model_of_comment(id,request)
+        if errors == True:
+            return serial
         
-        pass
+        serial.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)    
     
-    
+
+def get_serializer_of_commnet(id,request):
+    try:
+        commnetdata = comment.get(pk = id)
+        serial = commentgetserialiser(commnetdata)
+        try:
+            user = CustomUser.get(id = int(serial.data["created_by"]))
+            userserial  = loginserializer(user)
+            if str(request.user) == userserial.data["first_name"]:
+                return serial,False
+                print("else")
+            return Response(status=status.HTTP_403_FORBIDDEN),True
+        except CustomUser.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND),True
+            
         
+        
+    except comment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND),True
+        
+'''
+function return model of comment if 
+the user is autheorized
+'''   
+        
+def get_model_of_comment(id,request):
+    try:
+        postdata = comment.objects.get(pk=id)
+        serial  =  commentgetserialiser(postdata)
+        try:
+            userdata= CustomUser.objects.get(pk = serial.data["created_by"])
+            userserial = loginserializer(userdata)
+            if str(request.user) == userserial.data["first_name"]:
+                return postdata,False
+            print("else")
+            return Response(status=status.HTTP_403_FORBIDDEN),True
+        except CustomUser.DoesNotExist:
+            print("user not found")
+            return Response(status=status.HTTP_404_NOT_FOUND),True
 
-
-
-
+    except posts.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND),True
+        
