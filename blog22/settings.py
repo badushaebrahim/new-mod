@@ -189,3 +189,19 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'India/Kolkata'
 CELERY_TASK_SERIALIZER = 'json'
+
+# smtp
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_USE_TLS = True
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER ='badushaebrahim62@gmail.com'
+EMAIL_HOST_PASSWORD = "ddwytlhmkztrwuna"
+DEFAULT_FROM_EMAIL = 'Celery <badushaebrahim62@gmail.com>'
+
+
+
+
+
+
+# ddwytlhmkztrwuna
