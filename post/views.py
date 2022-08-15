@@ -12,7 +12,7 @@ from account.models import CustomUser
 from .models import comment, posts
 from .serializer import commentserializer, postserializer,createpostserializer,postserializer_byid,commentgetserialiser
 from account.serializer import loginserializer
-from .task import send_mail
+from .task import sent_mail2,test
 # Create your views here.
 
 
@@ -190,8 +190,11 @@ def make_comment(request):
                 if str(request.user) == ser.data["first_name"]:
                     if newcommentserial.is_valid():
                         newcommentserial.save()
-                        send_mail("user commnted",ser.data["email"])
+                        # sent_mail2("user comented on your post ",ser.data["email"])
+                        test("user comented on your post ",ser.data["email"])
+                        # if(res == "Done"):
                         return Response(newcommentserial.data,status=status.HTTP_200_OK)
+                        
                     # print(newcommentserial.error_messages)
 
                 return Response( newcommentserial.error_messages, status=status.HTTP_400_BAD_REQUEST)
