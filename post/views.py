@@ -208,14 +208,14 @@ comment class to get update and delet comment by the on who created ito
 class commentsclass(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    def get(request,id,*args,**kwargs):
+    def get(self,request,id,*args,**kwargs):
         errors = False
         serial ,errors = get_serializer_of_commnet(id,request)
         if errors == True:
             return serial
         return Response(serial.data,status=status.HTTP_200_OK)
     
-    def put(request,id,*args,**kwargs):
+    def put(self,request,id,*args,**kwargs):
         errors = False
         serial , errors = get_model_of_comment(id,request)
         if errors == True:
@@ -228,7 +228,7 @@ class commentsclass(APIView):
             print("invalid data",ser.error_messages)
             return Response(status= status.HTTP_400_BAD_REQUEST)
     
-    def delete(request,id,*args,**kwargs):
+    def delete(self,request,id,*args,**kwargs):
         errors = False
         serial , errors = get_model_of_comment(id,request)
         if errors == True:
@@ -240,10 +240,10 @@ class commentsclass(APIView):
 
 def get_serializer_of_commnet(id,request):
     try:
-        commnetdata = comment.get(pk = id)
+        commnetdata = comment.objects.get(pk = id)
         serial = commentgetserialiser(commnetdata)
         try:
-            user = CustomUser.get(id = int(serial.data["created_by"]))
+            user = CustomUser.objects.get(id = int(serial.data["created_by"]))
             userserial  = loginserializer(user)
             if str(request.user) == userserial.data["first_name"]:
                 return serial,False
@@ -255,7 +255,7 @@ def get_serializer_of_commnet(id,request):
         
         
     except comment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND),True
+            return Response("no ceommnet of said id",status=status.HTTP_404_NOT_FOUND),True
         
 '''
 function return model of comment if 
