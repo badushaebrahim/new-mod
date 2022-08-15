@@ -190,8 +190,8 @@ def make_comment(request):
                 if str(request.user) == ser.data["first_name"]:
                     if newcommentserial.is_valid():
                         newcommentserial.save()
-                        # sent_mail2("user comented on your post ",ser.data["email"])
-                        test("user comented on your post ",ser.data["email"])
+                        sent_mail2.delay("user comented on your post ",ser.data["email"])
+                        # test("user comented on your post ",ser.data["email"])
                         # if(res == "Done"):
                         return Response(newcommentserial.data,status=status.HTTP_200_OK)
                         
