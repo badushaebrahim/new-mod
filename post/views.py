@@ -169,7 +169,7 @@ def get_model_of_post(id,request):
 
 
 '''
-create a comment if you are logedin
+create a comment only  if you are logedin
 '''
 
 @api_view(['POST'])
@@ -201,7 +201,8 @@ def make_comment(request):
             return Response(loginserializer.error_messages, status=status.HTTP_404_NOT_FOUND)
 
 '''
-comment class to get update and delet comment by the on who created ito
+comment class to get update and delete
+comment by the on who created it
 '''
 
 
@@ -237,7 +238,10 @@ class commentsclass(APIView):
         serial.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)    
     
-
+'''
+function that return commnet serializer if the 
+user is autheorized
+'''
 def get_serializer_of_commnet(id,request):
     try:
         commnetdata = comment.objects.get(pk = id)
