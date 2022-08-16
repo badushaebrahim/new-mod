@@ -1,3 +1,4 @@
+from ast import Delete
 from asyncio import new_event_loop
 from pstats import Stats
 from rest_framework.response import Response
@@ -8,9 +9,10 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from account.models import CustomUser
-from .models import posts
-from .serializer import commentserializer, postserializer,createpostserializer,postserializer_byid
+from .models import comment, posts
+from .serializer import commentserializer, postserializer,createpostserializer,postserializer_byid,commentgetserialiser
 from account.serializer import loginserializer
+from .task import sent_mail2,test
 # Create your views here.
 
 
@@ -140,7 +142,7 @@ def get_seriallizer_of_post(id,request):
 
 
     except posts.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND),True
+        return Response("invalid user /user not found",status=status.HTTP_404_NOT_FOUND),True
 
 '''
 function to check if user is owner of the 
@@ -151,8 +153,8 @@ def get_model_of_post(id,request):
     try:
         postdata = posts.objects.get(pk=id)
         serial  =  postserializer_byid(postdata)
-        userdata= CustomUser.objects.get(pk = serial.data["user"])
         try:
+            userdata= CustomUser.objects.get(pk = serial.data["user"])
             userserial = loginserializer(userdata)
             if str(request.user) == userserial.data["first_name"]:
                 return postdata,False
@@ -167,7 +169,7 @@ def get_model_of_post(id,request):
 
 
 '''
-create a comment if you are logedin
+create a comment only  if you are logedin
 '''
 
 @api_view(['POST'])
@@ -178,7 +180,7 @@ def make_comment(request):
         newcommentserial = commentserializer(data= request.data)
         try:
             print(request.data["created_by"])
-            k= CustomUser.objects.get(pk =request.data["created_by"])
+            k= CustomUser.objects.get(pk=request.data["created_by"])
             ser =  loginserializer(k)
             try:
                 print(request.data["ofpost"])
@@ -188,11 +190,100 @@ def make_comment(request):
                 if str(request.user) == ser.data["first_name"]:
                     if newcommentserial.is_valid():
                         newcommentserial.save()
+                        sent_mail2.delay("user comented on your post ",ser.data["email"])
+                        # test("user comented on your post ",ser.data["email"])
+                        # if(res == "Done"):
+                        return Response(newcommentserial.data,status=status.HTTP_200_OK)
+                        
+                    # print(newcommentserial.error_messages)
 
                 return Response( newcommentserial.error_messages, status=status.HTTP_400_BAD_REQUEST)
             except posts.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+                return Response(postser.error_messages,status=status.HTTP_404_NOT_FOUND)
         except CustomUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(loginserializer.error_messages, status=status.HTTP_404_NOT_FOUND)
+
+'''
+comment class to get update and delete
+comment by the on who created it
+'''
 
 
+class commentsclass(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self,request,id,*args,**kwargs):
+        errors = False
+        serial ,errors = get_serializer_of_commnet(id,request)
+        if errors == True:
+            return serial
+        return Response(serial.data,status=status.HTTP_200_OK)
+    
+    def put(self,request,id,*args,**kwargs):
+        errors = False
+        serial , errors = get_model_of_comment(id,request)
+        if errors == True:
+            return serial
+        else :
+            ser = commentgetserialiser(serial,data=request.data)
+            if ser.is_valid():
+                ser.save()
+                return Response(ser.data,status=status.HTTP_200_OK)
+            print("invalid data",ser.error_messages)
+            return Response(status= status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self,request,id,*args,**kwargs):
+        errors = False
+        serial , errors = get_model_of_comment(id,request)
+        if errors == True:
+            return serial
+        
+        serial.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)    
+    
+'''
+function that return commnet serializer if the 
+user is autheorized
+'''
+def get_serializer_of_commnet(id,request):
+    try:
+        commnetdata = comment.objects.get(pk = id)
+        serial = commentgetserialiser(commnetdata)
+        try:
+            user = CustomUser.objects.get(id = int(serial.data["created_by"]))
+            userserial  = loginserializer(user)
+            if str(request.user) == userserial.data["first_name"]:
+                return serial,False
+                print("else")
+            return Response(status=status.HTTP_403_FORBIDDEN),True
+        except CustomUser.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND),True
+            
+        
+        
+    except comment.DoesNotExist:
+            return Response("no ceommnet of said id",status=status.HTTP_404_NOT_FOUND),True
+        
+'''
+function return model of comment if 
+the user is autheorized
+'''   
+        
+def get_model_of_comment(id,request):
+    try:
+        postdata = comment.objects.get(pk=id)
+        serial  =  commentgetserialiser(postdata)
+        try:
+            userdata= CustomUser.objects.get(pk = serial.data["created_by"])
+            userserial = loginserializer(userdata)
+            if str(request.user) == userserial.data["first_name"]:
+                return postdata,False
+            print("else")
+            return Response(status=status.HTTP_403_FORBIDDEN),True
+        except CustomUser.DoesNotExist:
+            print("user not found")
+            return Response(status=status.HTTP_404_NOT_FOUND),True
+
+    except posts.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND),True
+        

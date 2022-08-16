@@ -4,6 +4,8 @@ from account.serializer import loginserializer,updateserializer
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.views import APIView
+from celery import current_app
+from .task import adding_task
 
 import logging as logz
 # Create your views here.
@@ -143,4 +145,5 @@ def get_userobj_byid_and_avalicheck(id,request):
 @api_view(['GET','POST'])
 def test_auth(request):
     if request.method == 'GET':
-        return Response(request.data['user_id'])
+        res = adding_task(6,2)
+        return Response(res,status=status.HTTP_200_OK)
