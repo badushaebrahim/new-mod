@@ -152,4 +152,5 @@ def get_userobj_byid_and_avalicheck(id,request):
 def test_auth(request):
     if request.method == 'GET':
         res = adding_task(6,2)
-        return Response(res,status=status.HTTP_200_OK)
+        print(request.user)
+        return Response(status=status.HTTP_200_OK)
