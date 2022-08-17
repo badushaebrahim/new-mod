@@ -15,6 +15,12 @@ from rest_framework.response import Response
 from .models import CustomUser
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+
+
+'''
+user login view class that
+'''
+
 class CustomAuthToken(ObtainAuthToken):
 
 
@@ -27,7 +33,7 @@ class CustomAuthToken(ObtainAuthToken):
             )
         except CustomUser.DoesNotExist:
             logz.warning("user not found ")
-            print("user not found")
+            # print("user not found")
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = loginserializer(userdatas)
         logz.info("serializing data")
@@ -72,7 +78,7 @@ class user_crud(APIView):
         userdatas= CustomUser.objects.get(pk=id)
         logz.info("get user data")
         serial = loginserializer(userdatas,data=request.data)
-        print(serial.is_valid())
+        # print(serial.is_valid())
         if serial.is_valid():
             serial.save()
             logz.info("get user data updated")
@@ -92,11 +98,11 @@ class user_crud(APIView):
 
                 return Response(status=status.HTTP_204_NO_CONTENT)
             else:
-                print('else')
+                # print('else')
                 logz.warning("data error")
                 return Response(status=status.HTTP_403_FORBIDDEN)
         except CustomUser.DoesNotExist:
-            print("user not found")
+            # print("user not found")
             logz.warning("data error")
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -115,12 +121,12 @@ def get_userobj_byid(id,request):
         if str(request.user) == str(serial.data["first_name"]):
             return userdatas,False
         else:
-            print('else')
-            Response(status=status.HTTP_403_FORBIDDEN)
+            # print('else')
+            # Response(status=status.HTTP_403_FORBIDDEN)
             return Response(status=status.HTTP_403_FORBIDDEN),True
     except CustomUser.DoesNotExist:
-            print("user not found")
-            return Response(status=status.HTTP_404_NOT_FOUND),True
+            # print("user not found")
+            return Response("User not found",status=status.HTTP_404_NOT_FOUND),True
     
 
 def get_userobj_byid_and_avalicheck(id,request):
@@ -128,17 +134,17 @@ def get_userobj_byid_and_avalicheck(id,request):
     try:
         userdatas= CustomUser.objects.get(pk=id)
         serial = loginserializer(userdatas)
-        print("req",request.user)
-        print("ser",serial.data["username"])
+        # print("req",request.user)
+        # print("ser",serial.data["username"])
         if str(request.user) == str(serial.data["first_name"]):
             return serial,False
         else:
-            print('else')
+            # print('else')
             return Response(status=status.HTTP_403_FORBIDDEN),True
         
     except CustomUser.DoesNotExist:
-            print("user not found")
-            return Response(status=status.HTTP_404_NOT_FOUND),True
+            # print("user not found")
+            return Response("User not found",status=status.HTTP_404_NOT_FOUND),True
 
 
 
