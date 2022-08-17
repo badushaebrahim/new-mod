@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from account.models import CustomUser
 from .models import comment, posts
-from .serializer import commentserializer, postserializer,createpostserializer,postserializer_byid,commentgetserialiser
+from .serializer import  postserializer,createpostserializer,postserializer_byid, commentgetserialiser
 from account.serializer import loginserializer
 from .task import sent_mail2,test
 # Create your views here.
@@ -178,7 +178,7 @@ create a comment only  if you are logedin
 @permission_classes([IsAuthenticated])
 def make_comment(request):
     if request.method == 'POST':
-        newcommentserial = commentserializer(data= request.data)
+        newcommentserial = commentgetserialiser(data= request.data)
         try:
             # print(request.data["created_by"])
             k= CustomUser.objects.get(pk=request.data["created_by"])

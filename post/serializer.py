@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from .models import posts,comment
 
-class commentserializer(serializers.ModelSerializer):
-    class Meta:
-        model = comment
-        fields = '__all__'
+# class commentserializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = comment
+#         fields = '__all__'
 
 
 class commentgetserialiser (serializers.ModelSerializer):
@@ -15,7 +15,7 @@ class commentgetserialiser (serializers.ModelSerializer):
         fields = ['id','comment_text','ofpost','created_by']
         
         # def get_post(self,obj)
-        
+
 
 
 
@@ -34,7 +34,7 @@ class postserializer(serializers.ModelSerializer):
     def get_comments(self, obj):
         qs = comment.objects.all().filter(ofpost=obj)
         print(type(qs))
-        qs2 = commentserializer(qs,many=True)
+        qs2 = commentgetserialiser(qs,many=True)
         print(qs2.data)
         return qs2.data
 
