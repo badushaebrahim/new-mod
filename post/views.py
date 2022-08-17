@@ -1,6 +1,3 @@
-from ast import Delete
-from asyncio import new_event_loop
-from pstats import Stats
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import render
