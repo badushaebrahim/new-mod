@@ -81,7 +81,7 @@ class to read , update ,delete post based  on post id
 '''
 
 
-class post_rud(APIView):
+class PostCrud(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -206,7 +206,7 @@ comment by the on who created it
 '''
 
 
-class commentsclass(APIView):
+class CommentsClass(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self,request,id,*args,**kwargs):

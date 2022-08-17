@@ -46,7 +46,7 @@ class CustomAuthToken(ObtainAuthToken):
         return Response(status=status.HTTP_200_OK,data=data)
 
 
-class user_Register(APIView):
+class UserRegister(APIView):
     def post(self,request, *args, **kwargs):
         logz.info("get user data to creaet user")
         serial = loginserializer(data=request.data)
@@ -57,7 +57,7 @@ class user_Register(APIView):
         logz.warning("bad data error")
         return Response(serial.errors,status=status.HTTP_400_BAD_REQUEST)
 
-class user_crud(APIView):
+class UserCrud(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
