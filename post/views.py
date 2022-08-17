@@ -262,7 +262,7 @@ def get_serializer_of_commnet(id,request):
         
         
     except comment.DoesNotExist:
-            return Response("no ceommnet of said id",status=status.HTTP_404_NOT_FOUND),True
+            return Response("no comment of said id",status=status.HTTP_404_NOT_FOUND),True
         
 '''
 function return model of comment if 
