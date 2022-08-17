@@ -49,11 +49,11 @@ class createpostserializer(serializers.ModelSerializer):
             'user'
         ]
 
-class postserializer_byid(serializers.ModelSerializer):
-    class Meta:
-        model = posts
-        fields = [
-            'title',
-            'content',
-            'user'
-        ]
+# class postserializer_byid(serializers.ModelSerializer):
+#     class Meta:
+#         model = posts
+#         fields = [
+#             'title',
+#             'content',
+#             'user'
+#         ]

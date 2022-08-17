@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from account.models import CustomUser
 from .models import comment, posts
-from .serializer import  postserializer,createpostserializer,postserializer_byid, commentgetserialiser
+from .serializer import  postserializer,createpostserializer, commentgetserialiser
 from account.serializer import loginserializer
 from .task import sent_mail2,test
 # Create your views here.
@@ -89,7 +89,7 @@ class post_rud(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self,request,id,*args,**kwargs):
-        errors = False
+        errrors = False
         serial ,errors = get_seriallizer_of_post(id,request)
         if errors == True:
             return serial
@@ -101,7 +101,7 @@ class post_rud(APIView):
         if errors == True:
             return serial
         else :
-            ser = postserializer_byid(serial,data=request.data)
+            ser = createpostserializer(serial,data=request.data)
             if ser.is_valid():
                 ser.save()
                 return Response(ser.data,status=status.HTTP_200_OK)
@@ -128,7 +128,7 @@ function that check if user is owner of the post and return serializer for read
 def get_seriallizer_of_post(id,request):
     try:
         postdata = posts.objects.get(pk=id)
-        serial  =  postserializer_byid(postdata)
+        serial  =  createpostserializer(postdata)
         # print(serial.data)
         # print("mine",serial.data["user"])
         userdata= CustomUser.objects.get(id = int(serial.data["user"]))
@@ -153,7 +153,7 @@ post and return model for put,delete
 def get_model_of_post(id,request):
     try:
         postdata = posts.objects.get(pk=id)
-        serial  =  postserializer_byid(postdata)
+        serial  =  createpostserializer(postdata)
         try:
             userdata= CustomUser.objects.get(pk = serial.data["user"])
             userserial = loginserializer(userdata)
