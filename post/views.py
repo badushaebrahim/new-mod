@@ -107,7 +107,7 @@ class post_rud(APIView):
                 return Response(ser.data,status=status.HTTP_200_OK)
             # print("invalid data",ser.error_messages)
 
-            return Response(ser.error_messages,status= status.HTTP_400_BAD_REQUEST)
+            return Response(ser.errors,status= status.HTTP_400_BAD_REQUEST)
 
     def delete(self,request,id,*args,**kwargs):
         errors =False
@@ -230,7 +230,7 @@ class commentsclass(APIView):
                 ser.save()
                 return Response(ser.data,status=status.HTTP_200_OK)
             # print("invalid data",ser.error_messages)
-            return Response(ser.error_messages,status= status.HTTP_400_BAD_REQUEST)
+            return Response(ser.errors,status= status.HTTP_400_BAD_REQUEST)
     
     def delete(self,request,id,*args,**kwargs):
         errors = False

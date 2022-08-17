@@ -55,7 +55,7 @@ class user_Register(APIView):
             serial.save()
             return Response(status=status.HTTP_200_OK)
         logz.warning("bad data error")
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(serial.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class user_crud(APIView):
     authentication_classes = [TokenAuthentication]
@@ -83,7 +83,7 @@ class user_crud(APIView):
             serial.save()
             logz.info("get user data updated")
             return Response(serial.data,status=status.HTTP_202_ACCEPTED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(serial.errors,status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self,request,id,*args,**kwargs):
         try:
