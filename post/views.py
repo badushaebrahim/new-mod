@@ -186,8 +186,7 @@ def make_comment(request):
                 print(request.data["ofpost"])
                 postobj = posts.objects.get(pk = request.data["ofpost"])
                 postser = postserializer(postobj)
-
-                if str(request.user) == ser.data["first_name"]:
+                if str(request.user) == str(ser.data["first_name"]):
                     if newcommentserial.is_valid():
                         newcommentserial.save()
                         sent_mail2.delay("user comented on your post ",ser.data["email"])
@@ -196,8 +195,8 @@ def make_comment(request):
                         return Response(newcommentserial.data,status=status.HTTP_200_OK)
                         
                     # print(newcommentserial.error_messages)
-
-                return Response( newcommentserial.error_messages, status=status.HTTP_400_BAD_REQUEST)
+                print("199")
+                return Response( "user not atorized",  status=status.HTTP_403_FORBIDDEN)
             except posts.DoesNotExist:
                 return Response(postser.error_messages,status=status.HTTP_404_NOT_FOUND)
         except CustomUser.DoesNotExist:
