@@ -33,9 +33,9 @@ class postserializer(serializers.ModelSerializer):
         # depth =1
     def get_comments(self, obj):
         qs = comment.objects.all().filter(ofpost=obj)
-        print(type(qs))
+        # print(type(qs))
         qs2 = commentgetserialiser(qs,many=True)
-        print(qs2.data)
+        # print(qs2.data)
         return qs2.data
 
 
@@ -50,7 +50,6 @@ class createpostserializer(serializers.ModelSerializer):
         ]
 
 class postserializer_byid(serializers.ModelSerializer):
-    # comments = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = posts
         fields = [
