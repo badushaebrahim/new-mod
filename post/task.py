@@ -16,7 +16,7 @@ def sent_mail2(msg,email):
             recipient_list=[email],
             fail_silently=True,
         )
-        return "mail sent"
+        return f"mail sent{email}"
         
         
 @shared_task
