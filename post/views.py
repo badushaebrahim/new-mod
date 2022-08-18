@@ -1,3 +1,4 @@
+'''view for post'''
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes
@@ -14,27 +15,30 @@ from .task import sent_mail2
 # Create your views here.
 
 
-'''
-to get all post and comments
-'''
+
 
 
 @api_view(['GET'])
 def get_all_post(request):
+    '''
+    to get all post and comments
+    '''
     if request.method == 'GET':
         postdata = posts.objects.all()
         postserial = PostSerializer(postdata, many=True)
         return Response(postserial.data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-'''
-mycontent with userid and only content i created
-'''
+
 
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def my_content(request):
+    '''
+    mycontent with userid and only content i created
+    '''
     if request.method == 'GET':
         print(request.user)
         try:
@@ -51,17 +55,19 @@ def my_content(request):
                 return Response(status=status.HTTP_404_NOT_FOUND)
         except userdata.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-'''
-to create post if you are a logedin user
-'''
+
 
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def add_new_post(request):
+    '''
+    to create post if you are a logedin user
+    '''
     if request.method == 'POST':
         newpostserial = CreatePostSerializer(data=request.data)
         try:
@@ -80,12 +86,10 @@ def add_new_post(request):
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-'''
-class to read , update ,delete post based  on post id 
-'''
-
-
 class PostCrud(APIView):
+    '''
+    class to read , update ,delete post based  on post id 
+    '''
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -123,10 +127,11 @@ class PostCrud(APIView):
 
 
 
-'''
-function that check if user is owner of the post and return serializer for read
-'''
+
 def get_seriallizer_of_post(id, request):
+    '''
+    function that check if user is owner of the post and return serializer for read
+    '''
     try:
         postdata = posts.objects.get(pk=id)
         serial  =  CreatePostSerializer(postdata)
@@ -146,12 +151,13 @@ def get_seriallizer_of_post(id, request):
     except posts.DoesNotExist:
         return Response("invalid post /post not found",status=status.HTTP_404_NOT_FOUND),True
 
-'''
-function to check if user is owner of the 
-post and return model for put,delete 
-'''
+
 
 def get_model_of_post(id,request):
+    '''
+    function to check if user is owner of the 
+    post and return model for put, delete 
+    '''
     try:
         postdata = posts.objects.get(pk=id)
         serial  =  CreatePostSerializer(postdata)
@@ -170,14 +176,15 @@ def get_model_of_post(id,request):
         return Response(status=status.HTTP_404_NOT_FOUND),True
 
 
-'''
-create a comment only  if you are logedin
-'''
+
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def make_comment(request):
+    '''
+    create a comment only  if you are logedin
+    '''
     if request.method == 'POST':
         newcommentserial = CommentGetSerialiser(data= request.data)
         try:
