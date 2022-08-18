@@ -280,19 +280,19 @@ def get_model_of_comment(id, request):
     the user is autheorized
     '''
     try:
-        postdata = comment.objects.get(pk=id)
-        serial  =  CommentGetSerialiser(postdata)
+        commenttdata = comment.objects.get(pk=id)
+        serial  =  CommentGetSerialiser(commenttdata)
         try:
             userdata= CustomUser.objects.get(pk = serial.data["created_by"])
             userserial = LoginSerializer(userdata)
             if str(request.user) == userserial.data["first_name"]:
-                return postdata,False
+                return commenttdata,False
             # print("else")
             return Response(status=status.HTTP_403_FORBIDDEN), True
         except userdata.DoesNotExist:
             # print("user not found")
             return Response(status=status.HTTP_404_NOT_FOUND), True
 
-    except postdata.DoesNotExist:
+    except commenttdata.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND), True
         
