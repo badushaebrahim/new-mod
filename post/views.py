@@ -1,17 +1,16 @@
 from rest_framework.response import Response
 from rest_framework import status
-from django.shortcuts import render
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.decorators import permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from account.models import CustomUser
+from account.serializer import LoginSerializer
 from .models import comment, posts
 from .serializer import PostSerializer, CreatePostSerializer
 from .serializer import CommentGetSerialiser
-from account.serializer import LoginSerializer
-from .task import sent_mail2, test
+from .task import sent_mail2
 # Create your views here.
 
 
@@ -24,7 +23,6 @@ to get all post and comments
 def get_all_post(request):
     if request.method == 'GET':
         postdata = posts.objects.all()
-        # print(postdata)
         postserial = PostSerializer(postdata, many=True)
         return Response(postserial.data, status=status.HTTP_200_OK)
 
@@ -49,9 +47,9 @@ def my_content(request):
                     postserial = PostSerializer(postdata, many=True)
                     return Response(postserial.data, status=status.HTTP_200_OK)
                 return Response(status=status.HTTP_403_FORBIDDEN)
-            except posts.DoesNotExist:
+            except postdata.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
-        except CustomUser.DoesNotExist:
+        except userdata.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -67,8 +65,8 @@ def add_new_post(request):
     if request.method == 'POST':
         newpostserial = CreatePostSerializer(data=request.data)
         try:
-            k = CustomUser.objects.get(pk=request.data["user"])
-            ser = LoginSerializer(k)
+            userdata = CustomUser.objects.get(pk=request.data["user"])
+            ser = LoginSerializer(userdata)
             if str(request.user) == ser.data["first_name"]:
                 if newpostserial.is_valid():
                     newpostserial.save()
@@ -77,8 +75,8 @@ def add_new_post(request):
                 return Response(newpostserial.errors, 
                                 status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_403_FORBIDDEN)
-        except CustomUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        except userdata.DoesNotExist:
+            return Response(status=status.HTTP_403_FORBIDDEN)
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -94,14 +92,14 @@ class PostCrud(APIView):
     def get(self, request, id):
         errors = False
         serial ,errors = get_seriallizer_of_post(id, request)
-        if errors == True:
+        if errors is True:
             return serial
         return Response(serial.data)
     
     def put(self, request, id):
         errors = False
         serial , errors = get_model_of_post(id,request)
-        if errors == True:
+        if errors is True:
             return serial
         else :
             ser = CreatePostSerializer(serial, data=request.data)
@@ -201,7 +199,7 @@ def make_comment(request):
                     # print(newcommentserial.error_messages)
                 # print("199")
                 return Response( "user not atorized",  status=status.HTTP_403_FORBIDDEN)
-            except posts.DoesNotExist:
+            except postobj.DoesNotExist:
                 return Response(postser.error_messages,status=status.HTTP_404_NOT_FOUND)
         except CustomUser.DoesNotExist:
             return Response(LoginSerializer.error_messages, status=status.HTTP_404_NOT_FOUND)
