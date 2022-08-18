@@ -1,6 +1,6 @@
 from pstats import Stats
 from django.shortcuts import render
-from account.serializer import loginserializer,updateserializer
+from account.serializer import LoginSerializer,updateSerializer
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.views import APIView
@@ -35,7 +35,7 @@ class CustomAuthToken(ObtainAuthToken):
             logz.warning("user not found ")
             # print("user not found")
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = loginserializer(userdatas)
+        serializer = LoginSerializer(userdatas)
         logz.info("serializing data")
         token, created = Token.objects.get_or_create(user=userdatas)
         logz.info("token created or get and sent")
@@ -49,7 +49,7 @@ class CustomAuthToken(ObtainAuthToken):
 class UserRegister(APIView):
     def post(self,request, *args, **kwargs):
         logz.info("get user data to creaet user")
-        serial = loginserializer(data=request.data)
+        serial = LoginSerializer(data=request.data)
         if serial.is_valid():
             logz.info("data set and saved responded")
             serial.save()
@@ -77,7 +77,7 @@ class UserCrud(APIView):
     def put(self,request,id,*args,**kwargs):
         userdatas= CustomUser.objects.get(pk=id)
         logz.info("get user data")
-        serial = loginserializer(userdatas,data=request.data)
+        serial = LoginSerializer(userdatas,data=request.data)
         # print(serial.is_valid())
         if serial.is_valid():
             serial.save()
@@ -89,7 +89,7 @@ class UserCrud(APIView):
         try:
             userdatas= CustomUser.objects.get(pk=id)
             logz.info("get user data")
-            serial = loginserializer(userdatas)
+            serial = LoginSerializer(userdatas)
             # print(serial.data)
             # print()
             if str(request.user) == str(serial.data["first_name"]):
@@ -116,7 +116,7 @@ class UserCrud(APIView):
 def get_userobj_byid(id,request):
     try:
         userdatas= CustomUser.objects.get(pk=id)
-        serial = loginserializer(userdatas)
+        serial = LoginSerializer(userdatas)
         # print(serial.data)
         if str(request.user) == str(serial.data["first_name"]):
             return userdatas,False
@@ -133,7 +133,7 @@ def get_userobj_byid_and_avalicheck(id,request):
 
     try:
         userdatas= CustomUser.objects.get(pk=id)
-        serial = loginserializer(userdatas)
+        serial = LoginSerializer(userdatas)
         # print("req",request.user)
         # print("ser",serial.data["username"])
         if str(request.user) == str(serial.data["first_name"]):

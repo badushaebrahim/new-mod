@@ -7,7 +7,7 @@ from .models import posts,comment
 #         fields = '__all__'
 
 
-class commentgetserialiser (serializers.ModelSerializer):
+class CommentGetSerialiser (serializers.ModelSerializer):
     # post = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -19,7 +19,7 @@ class commentgetserialiser (serializers.ModelSerializer):
 
 
 
-class postserializer(serializers.ModelSerializer):
+class PostSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = posts
@@ -34,13 +34,13 @@ class postserializer(serializers.ModelSerializer):
     def get_comments(self, obj):
         qs = comment.objects.all().filter(ofpost=obj)
         # print(type(qs))
-        qs2 = commentgetserialiser(qs,many=True)
+        qs2 = CommentGetSerialiser(qs,many=True)
         # print(qs2.data)
         return qs2.data
 
 
 
-class createpostserializer(serializers.ModelSerializer):
+class CreatePostSerializer(serializers.ModelSerializer):
     class Meta:
         model =  posts
         fields = [
@@ -49,7 +49,7 @@ class createpostserializer(serializers.ModelSerializer):
             'user'
         ]
 
-# class postserializer_byid(serializers.ModelSerializer):
+# class PostSerializer_byid(serializers.ModelSerializer):
 #     class Meta:
 #         model = posts
 #         fields = [

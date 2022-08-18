@@ -8,9 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from account.models import CustomUser
 from .models import comment, posts
-from .serializer import postserializer, createpostserializer
-from .serializer import commentgetserialiser
-from account.serializer import loginserializer
+from .serializer import PostSerializer, CreatePostSerializer
+from .serializer import CommentGetSerialiser
+from account.serializer import LoginSerializer
 from .task import sent_mail2, test
 # Create your views here.
 
@@ -25,7 +25,7 @@ def get_all_post(request):
     if request.method == 'GET':
         postdata = posts.objects.all()
         # print(postdata)
-        postserial = postserializer(postdata, many=True)
+        postserial = PostSerializer(postdata, many=True)
         return Response(postserial.data, status=status.HTTP_200_OK)
 
 '''
@@ -41,12 +41,12 @@ def my_content(request):
         print(request.user)
         try:
             userdata = CustomUser.objects.get(first_name=request.user)
-            userserial = loginserializer(userdata)
+            userserial = LoginSerializer(userdata)
             # print("user id",userserial.data['id'])
             try:
                 postdata = posts.objects.all().filter(user=int(userserial.data['id']))
                 if str(request.user) == str(userserial.data["first_name"]):
-                    postserial = postserializer(postdata, many=True)
+                    postserial = PostSerializer(postdata, many=True)
                     return Response(postserial.data, status=status.HTTP_200_OK)
                 return Response(status=status.HTTP_403_FORBIDDEN)
             except posts.DoesNotExist:
@@ -65,10 +65,10 @@ to create post if you are a logedin user
 @permission_classes([IsAuthenticated])
 def add_new_post(request):
     if request.method == 'POST':
-        newpostserial = createpostserializer(data=request.data)
+        newpostserial = CreatePostSerializer(data=request.data)
         try:
             k = CustomUser.objects.get(pk=request.data["user"])
-            ser = loginserializer(k)
+            ser = LoginSerializer(k)
             if str(request.user) == ser.data["first_name"]:
                 if newpostserial.is_valid():
                     newpostserial.save()
@@ -104,7 +104,7 @@ class PostCrud(APIView):
         if errors == True:
             return serial
         else :
-            ser = createpostserializer(serial, data=request.data)
+            ser = CreatePostSerializer(serial, data=request.data)
             if ser.is_valid():
                 ser.save()
                 return Response(ser.data, status=status.HTTP_200_OK)
@@ -131,12 +131,12 @@ function that check if user is owner of the post and return serializer for read
 def get_seriallizer_of_post(id, request):
     try:
         postdata = posts.objects.get(pk=id)
-        serial  =  createpostserializer(postdata)
+        serial  =  CreatePostSerializer(postdata)
         # print(serial.data)
         # print("mine",serial.data["user"])
         userdata= CustomUser.objects.get(id = int(serial.data["user"]))
         try:
-            userserial = loginserializer(userdata)
+            userserial = LoginSerializer(userdata)
             if str(request.user) == userserial.data["first_name"]:
                 return serial,False
             # print("else")
@@ -156,10 +156,10 @@ post and return model for put,delete
 def get_model_of_post(id,request):
     try:
         postdata = posts.objects.get(pk=id)
-        serial  =  createpostserializer(postdata)
+        serial  =  CreatePostSerializer(postdata)
         try:
             userdata= CustomUser.objects.get(pk = serial.data["user"])
-            userserial = loginserializer(userdata)
+            userserial = LoginSerializer(userdata)
             if str(request.user) == userserial.data["first_name"]:
                 return postdata,False
             # print("else")
@@ -181,15 +181,15 @@ create a comment only  if you are logedin
 @permission_classes([IsAuthenticated])
 def make_comment(request):
     if request.method == 'POST':
-        newcommentserial = commentgetserialiser(data= request.data)
+        newcommentserial = CommentGetSerialiser(data= request.data)
         try:
             # print(request.data["created_by"])
             k= CustomUser.objects.get(pk=request.data["created_by"])
-            ser =  loginserializer(k)
+            ser =  LoginSerializer(k)
             try:
                 # print(request.data["ofpost"])
                 postobj = posts.objects.get(pk = request.data["ofpost"])
-                postser = postserializer(postobj)
+                postser = PostSerializer(postobj)
                 if str(request.user) == str(ser.data["first_name"]):
                     if newcommentserial.is_valid():
                         newcommentserial.save()
@@ -204,7 +204,7 @@ def make_comment(request):
             except posts.DoesNotExist:
                 return Response(postser.error_messages,status=status.HTTP_404_NOT_FOUND)
         except CustomUser.DoesNotExist:
-            return Response(loginserializer.error_messages, status=status.HTTP_404_NOT_FOUND)
+            return Response(LoginSerializer.error_messages, status=status.HTTP_404_NOT_FOUND)
 
 '''
 comment class to get update and delete
@@ -228,7 +228,7 @@ class CommentsClass(APIView):
         if errors == True:
             return serial
         else :
-            ser = commentgetserialiser(serial,data=request.data)
+            ser = CommentGetSerialiser(serial,data=request.data)
             if ser.is_valid():
                 ser.save()
                 return Response(ser.data,status=status.HTTP_200_OK)
@@ -251,10 +251,10 @@ user is autheorized
 def get_serializer_of_commnet(id,request):
     try:
         commnetdata = comment.objects.get(pk = id)
-        serial = commentgetserialiser(commnetdata)
+        serial = CommentGetSerialiser(commnetdata)
         try:
             user = CustomUser.objects.get(id = int(serial.data["created_by"]))
-            userserial  = loginserializer(user)
+            userserial  = LoginSerializer(user)
             if str(request.user) == userserial.data["first_name"]:
                 return serial,False
                 # print("else")
@@ -275,10 +275,10 @@ the user is autheorized
 def get_model_of_comment(id,request):
     try:
         postdata = comment.objects.get(pk=id)
-        serial  =  commentgetserialiser(postdata)
+        serial  =  CommentGetSerialiser(postdata)
         try:
             userdata= CustomUser.objects.get(pk = serial.data["created_by"])
-            userserial = loginserializer(userdata)
+            userserial = LoginSerializer(userdata)
             if str(request.user) == userserial.data["first_name"]:
                 return postdata,False
             # print("else")

@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from .models import CustomUser
 
-class loginserializer(serializers.ModelSerializer):
+class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id','username','first_name','last_name','phone_number','email','password']
@@ -11,7 +11,7 @@ class loginserializer(serializers.ModelSerializer):
 
 
 
-class updateserializer(serializers.ModelSerializer):
+class updateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['username','first_name','last_name','email','password']
