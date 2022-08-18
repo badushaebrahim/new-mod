@@ -260,22 +260,17 @@ def get_serializer_of_commnet(id, request):
         commnetdata = comment.objects.get(pk = id)
         serial = CommentGetSerialiser(commnetdata)
         try:
-            user = CustomUser.objects.get(id = int(serial.data["created_by"]))
-            userserial  = LoginSerializer(user)
+            userobj = CustomUser.objects.get(id = int(serial.data["created_by"]))
+            userserial  = LoginSerializer(userobj)
             if str(request.user) == userserial.data["first_name"]:
                 return serial,False
                 # print("else")
-            return Response(status=status.HTTP_403_FORBIDDEN),True
+            return Response(status=status.HTTP_403_FORBIDDEN), True
         except CustomUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND),True
-            
-        
-        
+            return Response(status=status.HTTP_404_NOT_FOUND), True        
     except comment.DoesNotExist:
-            return Response("no comment of said id",status=status.HTTP_404_NOT_FOUND),True
-        
- 
-        
+            return Response("no comment of said id",status=status.HTTP_404_NOT_FOUND), True
+  
 def get_model_of_comment(id, request):
     '''
     function return model of comment if 
