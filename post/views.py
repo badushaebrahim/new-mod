@@ -17,9 +17,6 @@ from .task import sent_mail2
 # Create your views here.
 
 
-
-
-
 @api_view(['GET'])
 def get_all_post(request):
     '''

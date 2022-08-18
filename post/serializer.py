@@ -9,11 +9,10 @@ from .models import posts,comment
 
 class CommentGetSerialiser (serializers.ModelSerializer):
     # post = serializers.SerializerMethodField(read_only=True)
-    '''  '''
+    '''comment serializer for comment crud'''
     class Meta:
         model = comment
         fields = ['id','comment_text','ofpost','created_by']
-        
         # def get_post(self,obj)
 
 
