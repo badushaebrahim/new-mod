@@ -3,7 +3,7 @@ from account.models import CustomUser
 # Create your models here.
 
 class posts(models.Model):
-    '''post moidel'''
+    '''post model'''
     title = models.CharField(max_length=100)
     content = models.CharField(max_length=10000)
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
@@ -17,7 +17,7 @@ class comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     ofpost = models.ForeignKey(posts,on_delete=models.CASCADE)
     
-    
+    '''this is propertuy used to list comment'''
     @property
     def comments(self):
         instance = self
