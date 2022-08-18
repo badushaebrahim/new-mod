@@ -6,12 +6,14 @@ from rest_framework.decorators import permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+import logging as logz
 from account.models import CustomUser
 from account.serializer import LoginSerializer
 from .models import comment, posts
 from .serializer import PostSerializer, CreatePostSerializer
 from .serializer import CommentGetSerialiser
 from .task import sent_mail2
+
 # Create your views here.
 
 
@@ -269,7 +271,8 @@ def get_serializer_of_commnet(id, request):
         except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND), True        
     except comment.DoesNotExist:
-            return Response("no comment of said id",status=status.HTTP_404_NOT_FOUND), True
+        logz.warning(f"comment  not found of id{id}")
+        return Response("comment  not found",status=status.HTTP_404_NOT_FOUND), True
   
 def get_model_of_comment(id, request):
     '''
