@@ -182,8 +182,8 @@ def make_comment(request):
         newcommentserial = CommentGetSerialiser(data= request.data)
         try:
             # print(request.data["created_by"])
-            k= CustomUser.objects.get(pk=request.data["created_by"])
-            ser =  LoginSerializer(k)
+            userobj= CustomUser.objects.get(pk=request.data["created_by"])
+            ser =  LoginSerializer(userobj)
             try:
                 # print(request.data["ofpost"])
                 postobj = posts.objects.get(pk = request.data["ofpost"])
@@ -204,23 +204,24 @@ def make_comment(request):
         except CustomUser.DoesNotExist:
             return Response(LoginSerializer.error_messages, status=status.HTTP_404_NOT_FOUND)
 
-'''
-comment class to get update and delete
-comment by the on who created it
-'''
+
 
 
 class CommentsClass(APIView):
+    '''
+    comment class to get update and delete
+    comment by the on who created it
+    '''
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    def get(self,request,id,*args,**kwargs):
+    def get(self, request, id):
         errors = False
         serial ,errors = get_serializer_of_commnet(id,request)
         if errors == True:
             return serial
         return Response(serial.data,status=status.HTTP_200_OK)
     
-    def put(self,request,id,*args,**kwargs):
+    def put(self, request ,id):
         errors = False
         serial , errors = get_model_of_comment(id,request)
         if errors == True:
@@ -233,7 +234,7 @@ class CommentsClass(APIView):
             # print("invalid data",ser.error_messages)
             return Response(ser.errors,status= status.HTTP_400_BAD_REQUEST)
     
-    def delete(self,request,id,*args,**kwargs):
+    def delete(self, request, id):
         errors = False
         serial , errors = get_model_of_comment(id,request)
         if errors == True:
@@ -242,11 +243,12 @@ class CommentsClass(APIView):
         serial.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)    
     
-'''
-function that return commnet serializer if the 
-user is autheorized
-'''
-def get_serializer_of_commnet(id,request):
+
+def get_serializer_of_commnet(id, request):
+    '''
+    function that return commnet serializer if the 
+    user is autheorized
+    '''
     try:
         commnetdata = comment.objects.get(pk = id)
         serial = CommentGetSerialiser(commnetdata)
@@ -265,12 +267,13 @@ def get_serializer_of_commnet(id,request):
     except comment.DoesNotExist:
             return Response("no comment of said id",status=status.HTTP_404_NOT_FOUND),True
         
-'''
-function return model of comment if 
-the user is autheorized
-'''   
+ 
         
-def get_model_of_comment(id,request):
+def get_model_of_comment(id, request):
+    '''
+    function return model of comment if 
+    the user is autheorized
+    '''
     try:
         postdata = comment.objects.get(pk=id)
         serial  =  CommentGetSerialiser(postdata)
@@ -280,11 +283,11 @@ def get_model_of_comment(id,request):
             if str(request.user) == userserial.data["first_name"]:
                 return postdata,False
             # print("else")
-            return Response(status=status.HTTP_403_FORBIDDEN),True
-        except CustomUser.DoesNotExist:
+            return Response(status=status.HTTP_403_FORBIDDEN), True
+        except userdata.DoesNotExist:
             # print("user not found")
-            return Response(status=status.HTTP_404_NOT_FOUND),True
+            return Response(status=status.HTTP_404_NOT_FOUND), True
 
-    except posts.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND),True
+    except postdata.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND), True
         
