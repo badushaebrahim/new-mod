@@ -1,32 +1,37 @@
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import render
-from rest_framework.decorators import api_view,authentication_classes,permission_classes
+from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from account.models import CustomUser
 from .models import comment, posts
-from .serializer import  postserializer,createpostserializer, commentgetserialiser
+from .serializer import postserializer, createpostserializer
+from .serializer import commentgetserialiser
 from account.serializer import loginserializer
-from .task import sent_mail2,test
+from .task import sent_mail2, test
 # Create your views here.
 
 
 '''
 to get all post and comments
 '''
+
+
 @api_view(['GET'])
 def get_all_post(request):
     if request.method == 'GET':
         postdata = posts.objects.all()
         # print(postdata)
-        postserial = postserializer(postdata,many=True)
-        return Response(postserial.data,status=status.HTTP_200_OK)
+        postserial = postserializer(postdata, many=True)
+        return Response(postserial.data, status=status.HTTP_200_OK)
 
 '''
 mycontent with userid and only content i created
 '''
+
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -35,14 +40,14 @@ def my_content(request):
     if request.method == 'GET':
         print(request.user)
         try:
-            userdata = CustomUser.objects.get(first_name = request.user)
+            userdata = CustomUser.objects.get(first_name=request.user)
             userserial = loginserializer(userdata)
             # print("user id",userserial.data['id'])
             try:
                 postdata = posts.objects.all().filter(user=int(userserial.data['id']))
                 if str(request.user) == str(userserial.data["first_name"]):
-                    postserial = postserializer(postdata,many=True)
-                    return Response(postserial.data,status=status.HTTP_200_OK)
+                    postserial = postserializer(postdata, many=True)
+                    return Response(postserial.data, status=status.HTTP_200_OK)
                 return Response(status=status.HTTP_403_FORBIDDEN)
             except posts.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
@@ -54,27 +59,28 @@ def my_content(request):
 to create post if you are a logedin user
 '''
 
+
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def add_new_post(request):
     if request.method == 'POST':
-        newpostserial = createpostserializer(data= request.data)
+        newpostserial = createpostserializer(data=request.data)
         try:
-            k= CustomUser.objects.get(pk =request.data["user"])
-            ser =  loginserializer(k)
+            k = CustomUser.objects.get(pk=request.data["user"])
+            ser = loginserializer(k)
             if str(request.user) == ser.data["first_name"]:
                 if newpostserial.is_valid():
                     newpostserial.save()
-                    return Response(newpostserial.data,status=status.HTTP_201_CREATED)
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+                    return Response(newpostserial.data, 
+                                    status=status.HTTP_201_CREATED)
+                return Response(newpostserial.errors, 
+                                status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_403_FORBIDDEN)
         except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
 
 '''
 class to read , update ,delete post based  on post id 
@@ -85,30 +91,30 @@ class PostCrud(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self,request,id,*args,**kwargs):
-        errrors = False
-        serial ,errors = get_seriallizer_of_post(id,request)
+    def get(self, request, id):
+        errors = False
+        serial ,errors = get_seriallizer_of_post(id, request)
         if errors == True:
             return serial
         return Response(serial.data)
     
-    def put(self,request,id,*args,**kwargs):
+    def put(self, request, id):
         errors = False
         serial , errors = get_model_of_post(id,request)
         if errors == True:
             return serial
         else :
-            ser = createpostserializer(serial,data=request.data)
+            ser = createpostserializer(serial, data=request.data)
             if ser.is_valid():
                 ser.save()
-                return Response(ser.data,status=status.HTTP_200_OK)
+                return Response(ser.data, status=status.HTTP_200_OK)
             # print("invalid data",ser.error_messages)
 
-            return Response(ser.errors,status= status.HTTP_400_BAD_REQUEST)
+            return Response(ser.errors, status= status.HTTP_400_BAD_REQUEST)
 
-    def delete(self,request,id,*args,**kwargs):
+    def delete(self, request, id):
         errors =False
-        serial,errors = get_model_of_post(id,request)
+        serial,errors = get_model_of_post(id, request)
         if errors == True:
             return serial
         
@@ -122,7 +128,7 @@ class PostCrud(APIView):
 '''
 function that check if user is owner of the post and return serializer for read
 '''
-def get_seriallizer_of_post(id,request):
+def get_seriallizer_of_post(id, request):
     try:
         postdata = posts.objects.get(pk=id)
         serial  =  createpostserializer(postdata)
@@ -140,7 +146,7 @@ def get_seriallizer_of_post(id,request):
 
 
     except posts.DoesNotExist:
-        return Response("invalid user /user not found",status=status.HTTP_404_NOT_FOUND),True
+        return Response("invalid post /post not found",status=status.HTTP_404_NOT_FOUND),True
 
 '''
 function to check if user is owner of the 
