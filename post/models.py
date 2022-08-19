@@ -12,7 +12,7 @@ class posts(models.Model):
     # comment = models.ManyToManyField(comment)
 
 class comment(models.Model):
-    '''ceomment model'''
+    '''comment model'''
     comment_text = models.CharField(max_length=500)
     created_by = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
