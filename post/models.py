@@ -1,6 +1,7 @@
+'''model of post , comments'''
 from django.db import models
 from account.models import CustomUser
-# Create your models here.
+
 
 class posts(models.Model):
     '''post model'''
@@ -23,8 +24,3 @@ class comment(models.Model):
         instance = self
         qs = comment.objects.filter(parent=instance)
         return qs
-    
-    
-
-
-
