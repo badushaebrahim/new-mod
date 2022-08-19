@@ -25,6 +25,7 @@ class CustomAuthToken(ObtainAuthToken):
      for login and return token as well as id'''
 
     def post(self, request):
+        '''login'''
         try:
             logz.info("user token access")
             user_datas= CustomUser.objects.get(
@@ -45,11 +46,11 @@ class CustomAuthToken(ObtainAuthToken):
         }
         return Response(status=status.HTTP_200_OK,data=data)
 
-
 class UserRegister(APIView):
     '''this view is used to register and create a new user
      only if data is valid'''
     def post(self, request):
+        '''create user'''
         logz.info("get user data to creaet user")
         serial = LoginSerializer(data=request.data)
         if serial.is_valid():
@@ -65,16 +66,18 @@ class UserCrud(APIView):
     '''view is used for user to update delete  or update there 
     account details '''
     def get(self, request, id):
+        ''' function to return user data'''
         logz.info("get user data")
         error=False
         serial,error = get_userobj_byid_and_avalicheck(id, request)
-        if error == True:
+        if error is True:
             logz.warning("user data error")
             return serial
         logz.info("get user data sent")
         return Response(serial.data, status=status.HTTP_200_OK)
 
     def put(self, request, id):
+        '''update user data'''
         errors = False
         user_datas,errors= get_usermodel_byid_and_avalicheck(id, request)
         logz.info("get user data")
@@ -88,6 +91,7 @@ class UserCrud(APIView):
         return user_datas
     
     def delete(self, request, id):
+        '''delete user'''
         errors = False
         user_datas , errors= get_usermodel_byid_and_avalicheck(id, request)
         logz.info("get user data")
