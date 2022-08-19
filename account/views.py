@@ -65,7 +65,6 @@ class UserCrud(APIView):
     account details '''
     def get(self, request, id):
         logz.info("get user data")
-        # print(request.user)
         error=False
         serial,error = get_userobj_byid_and_avalicheck(id, request)
         if error == True:
@@ -73,55 +72,49 @@ class UserCrud(APIView):
             return serial
         logz.info("get user data sent")
         return Response(serial.data, status=status.HTTP_200_OK)
-        
-    
 
     def put(self, request, id):
-        user_datas= CustomUser.objects.get(pk=id)
+        errors = False
+        user_datas,errors= get_usermodel_byid_and_avalicheck(id, request)
         logz.info("get user data")
-        serial = LoginSerializer(user_datas, data=request.data)
-        # print(serial.is_valid())
-        if serial.is_valid():
-            serial.save()
-            logz.info("get user data updated")
-            return Response(serial.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serial.errors,status=status.HTTP_400_BAD_REQUEST)
+        if errors is False:
+            serial = LoginSerializer(user_datas, data=request.data)
+            if serial.is_valid():
+                serial.save()
+                logz.info("get user data updated")
+                return Response(serial.data, status=status.HTTP_202_ACCEPTED)
+            return Response(serial.errors,status=status.HTTP_400_BAD_REQUEST)
+        return user_datas
     
     def delete(self, request, id):
-        try:
-            user_datas= CustomUser.objects.get(pk=id)
+            errors = False
+            user_datas , errors= get_usermodel_byid_and_avalicheck(id, request)
             logz.info("get user data")
-            serial = LoginSerializer(user_datas)
-            # print(serial.data)
-            # print()
-            if str(request.user) == str(serial.data["first_name"]):
+            if errors is False:
                 user_datas.delete()
                 logz.info("get user data deleted")
-
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            else:
-                # print('else')
-                logz.warning("data error")
-                return Response(status=status.HTTP_403_FORBIDDEN)
-        except CustomUser.DoesNotExist:
-            # print("user not found")
+            
             logz.warning("data error")
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        
 
+def get_usermodel_byid_and_avalicheck(id, request):
+    '''function used to return model '''
 
-def get_userobj_byid(id, request):
-    '''function to get object  by id and check if
-        the user is the same my useing request.'''
     try:
         user_datas= CustomUser.objects.get(pk=id)
         serial = LoginSerializer(user_datas)
-        # print(serial.data)
         if str(request.user) == str(serial.data["first_name"]):
             return user_datas, False
-            
+
         return Response(status=status.HTTP_403_FORBIDDEN), True
-    except CustomUser.DoesNotExist:
+        
+    except user_datas.DoesNotExist:
         return Response("User not found", status=status.HTTP_404_NOT_FOUND), True
+
+
+
 
 def get_userobj_byid_and_avalicheck(id, request):
     '''function used to return seializer '''
