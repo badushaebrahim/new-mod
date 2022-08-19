@@ -1,4 +1,5 @@
 '''user view'''
+from cmath import log
 import logging as logz
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -87,16 +88,13 @@ class UserCrud(APIView):
         return user_datas
     
     def delete(self, request, id):
-            errors = False
-            user_datas , errors= get_usermodel_byid_and_avalicheck(id, request)
-            logz.info("get user data")
-            if errors is False:
-                user_datas.delete()
-                logz.info("get user data deleted")
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            
-            logz.warning("data error")
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        errors = False
+        user_datas , errors= get_usermodel_byid_and_avalicheck(id, request)
+        logz.info("get user data")
+        if errors is False:
+            user_datas.delete()
+            logz.info("get user data deleted")
+            return Response(status=status.HTTP_204_NO_CONTENT)
         
 
 def get_usermodel_byid_and_avalicheck(id, request):
@@ -107,10 +105,11 @@ def get_usermodel_byid_and_avalicheck(id, request):
         serial = LoginSerializer(user_datas)
         if str(request.user) == str(serial.data["first_name"]):
             return user_datas, False
-
+        logz.warning("un authorized")
         return Response(status=status.HTTP_403_FORBIDDEN), True
         
     except user_datas.DoesNotExist:
+        logz.warning("user not found")
         return Response("User not found", status=status.HTTP_404_NOT_FOUND), True
 
 
@@ -124,10 +123,10 @@ def get_userobj_byid_and_avalicheck(id, request):
         serial = LoginSerializer(user_datas)
         if str(request.user) == str(serial.data["first_name"]):
             return serial, False
-
         return Response(status=status.HTTP_403_FORBIDDEN), True
         
     except CustomUser.DoesNotExist:
+        logz.warning("user not found")
         return Response("User not found", status=status.HTTP_404_NOT_FOUND), True
 
 
