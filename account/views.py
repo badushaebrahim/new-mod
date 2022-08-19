@@ -1,33 +1,32 @@
-from pstats import Stats
-from django.shortcuts import render
-from account.serializer import LoginSerializer,updateSerializer
+'''user view'''
+import logging as logz
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.views import APIView
-from celery import current_app
-from .task import adding_task
-
-import logging as logz
-# Create your views here.
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from .models import CustomUser
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from account.serializer import LoginSerializer
+from .task import adding_task
+from .models import CustomUser
 
 
-'''
-user login view class that
-'''
+# Create your views here.
+
+
+
 
 class CustomAuthToken(ObtainAuthToken):
+    '''custom login class which has post method that
+         takes in email and password an return or create user token
+     for login and return token as well as id'''
 
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         try:
             logz.info("user token access")
-            userdatas= CustomUser.objects.get(
+            user_datas= CustomUser.objects.get(
                 email= request.data['email'],
             password = request.data['password']
             )
@@ -35,9 +34,9 @@ class CustomAuthToken(ObtainAuthToken):
             logz.warning("user not found ")
             # print("user not found")
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = LoginSerializer(userdatas)
+        serializer = LoginSerializer(user_datas)
         logz.info("serializing data")
-        token, created = Token.objects.get_or_create(user=userdatas)
+        token, created = Token.objects.get_or_create(user=user_datas)
         logz.info("token created or get and sent")
         data= {
             'token': token.key,
@@ -47,7 +46,9 @@ class CustomAuthToken(ObtainAuthToken):
 
 
 class UserRegister(APIView):
-    def post(self,request, *args, **kwargs):
+    '''this view is used to register and create a new user
+     only if data is valid'''
+    def post(self, request):
         logz.info("get user data to creaet user")
         serial = LoginSerializer(data=request.data)
         if serial.is_valid():
@@ -60,40 +61,41 @@ class UserRegister(APIView):
 class UserCrud(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    
-    def get(self,request,id,*args,**kwargs):
+    '''view is used for user to update delete  or update there 
+    account details '''
+    def get(self, request, id):
         logz.info("get user data")
         # print(request.user)
         error=False
-        serial,error = get_userobj_byid_and_avalicheck(id,request)
+        serial,error = get_userobj_byid_and_avalicheck(id, request)
         if error == True:
             logz.warning("user data error")
             return serial
         logz.info("get user data sent")
-        return Response(serial.data,status=status.HTTP_200_OK)
+        return Response(serial.data, status=status.HTTP_200_OK)
         
     
 
-    def put(self,request,id,*args,**kwargs):
-        userdatas= CustomUser.objects.get(pk=id)
+    def put(self, request, id):
+        user_datas= CustomUser.objects.get(pk=id)
         logz.info("get user data")
-        serial = LoginSerializer(userdatas,data=request.data)
+        serial = LoginSerializer(user_datas, data=request.data)
         # print(serial.is_valid())
         if serial.is_valid():
             serial.save()
             logz.info("get user data updated")
-            return Response(serial.data,status=status.HTTP_202_ACCEPTED)
+            return Response(serial.data, status=status.HTTP_202_ACCEPTED)
         return Response(serial.errors,status=status.HTTP_400_BAD_REQUEST)
     
-    def delete(self,request,id,*args,**kwargs):
+    def delete(self, request, id):
         try:
-            userdatas= CustomUser.objects.get(pk=id)
+            user_datas= CustomUser.objects.get(pk=id)
             logz.info("get user data")
-            serial = LoginSerializer(userdatas)
+            serial = LoginSerializer(user_datas)
             # print(serial.data)
             # print()
             if str(request.user) == str(serial.data["first_name"]):
-                userdatas.delete()
+                user_datas.delete()
                 logz.info("get user data deleted")
 
                 return Response(status=status.HTTP_204_NO_CONTENT)
@@ -107,50 +109,41 @@ class UserCrud(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-    
-
-
-
-# function to get object  by id and check if the user is the same my useing request.
-
-def get_userobj_byid(id,request):
+def get_userobj_byid(id, request):
+    '''function to get object  by id and check if
+        the user is the same my useing request.'''
     try:
-        userdatas= CustomUser.objects.get(pk=id)
-        serial = LoginSerializer(userdatas)
+        user_datas= CustomUser.objects.get(pk=id)
+        serial = LoginSerializer(user_datas)
         # print(serial.data)
         if str(request.user) == str(serial.data["first_name"]):
-            return userdatas,False
-        else:
-            # print('else')
-            # Response(status=status.HTTP_403_FORBIDDEN)
-            return Response(status=status.HTTP_403_FORBIDDEN),True
+            return user_datas, False
+            
+        return Response(status=status.HTTP_403_FORBIDDEN), True
     except CustomUser.DoesNotExist:
-            # print("user not found")
-            return Response("User not found",status=status.HTTP_404_NOT_FOUND),True
-    
+        return Response("User not found", status=status.HTTP_404_NOT_FOUND), True
 
-def get_userobj_byid_and_avalicheck(id,request):
+def get_userobj_byid_and_avalicheck(id, request):
+    '''function used to return seializer '''
 
     try:
-        userdatas= CustomUser.objects.get(pk=id)
-        serial = LoginSerializer(userdatas)
-        # print("req",request.user)
-        # print("ser",serial.data["username"])
+        user_datas= CustomUser.objects.get(pk=id)
+        serial = LoginSerializer(user_datas)
         if str(request.user) == str(serial.data["first_name"]):
-            return serial,False
-        else:
-            # print('else')
-            return Response(status=status.HTTP_403_FORBIDDEN),True
+            return serial, False
+
+        return Response(status=status.HTTP_403_FORBIDDEN), True
         
     except CustomUser.DoesNotExist:
-            # print("user not found")
-            return Response("User not found",status=status.HTTP_404_NOT_FOUND),True
+        return Response("User not found", status=status.HTTP_404_NOT_FOUND), True
 
 
 
 @api_view(['GET','POST'])
 def test_auth(request):
+    '''simple test view'''
     if request.method == 'GET':
         res = adding_task(6,2)
         print(request.user)
-        return Response(status=status.HTTP_200_OK)
+        return Response(res, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)

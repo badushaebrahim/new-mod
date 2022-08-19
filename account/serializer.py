@@ -11,7 +11,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
 
 
-class updateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['username','first_name','last_name','email','password']
+# class updateSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = CustomUser
+#         fields = ['username','first_name','last_name','email','password']
