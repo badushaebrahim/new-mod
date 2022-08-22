@@ -30,7 +30,7 @@ class CustomAuthToken(ObtainAuthToken):
                 email= request.data['email'],
             password = request.data['password']
             )
-        except user_datas.DoesNotExist:
+        except CustomUser.DoesNotExist:
             logz.warning("user not found ")
             # print("user not found")
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -67,7 +67,7 @@ class UserCrud(APIView):
         ''' function to return user data'''
         logz.info("get user data")
         error=False
-        serial,error = get_userobj_byid_and_avalicheck(id, request)
+        serial,error = get_serializer_byid(id, request)
         if error is True:
             logz.warning("user data error")
             return serial
@@ -77,7 +77,7 @@ class UserCrud(APIView):
     def put(self, request, id):
         '''update user data'''
         errors = False
-        user_datas,errors= get_usermodel_byid_and_avalicheck(id, request)
+        user_datas,errors= get_usermodel_byid(id, request)
         logz.info("get user data")
         if errors is False:
             serial = LoginSerializer(user_datas, data=request.data)
@@ -91,7 +91,7 @@ class UserCrud(APIView):
     def delete(self, request, id):
         '''delete user'''
         errors = False
-        user_datas , errors= get_usermodel_byid_and_avalicheck(id, request)
+        user_datas , errors= get_usermodel_byid(id, request)
         logz.info("get user data")
         if errors is False:
             user_datas.delete()
@@ -99,7 +99,7 @@ class UserCrud(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return user_datas
 
-def get_usermodel_byid_and_avalicheck(id, request):
+def get_usermodel_byid(id, request):
     '''function used to return model '''
 
     try:
@@ -110,14 +110,14 @@ def get_usermodel_byid_and_avalicheck(id, request):
         logz.warning("un authorized")
         return Response(status=status.HTTP_403_FORBIDDEN), True
 
-    except user_datas.DoesNotExist:
+    except CustomUser.DoesNotExist:
         logz.warning("user not found")
         return Response("User not found", status=status.HTTP_404_NOT_FOUND), True
 
 
 
 
-def get_userobj_byid_and_avalicheck(id, request):
+def get_serializer_byid(id, request):
     '''function used to return seializer '''
 
     try:
@@ -127,7 +127,7 @@ def get_userobj_byid_and_avalicheck(id, request):
             return serial, False
         return Response(status=status.HTTP_403_FORBIDDEN), True
 
-    except user_datas.DoesNotExist:
+    except CustomUser.DoesNotExist:
         logz.warning("user not found")
         return Response("User not found", status=status.HTTP_404_NOT_FOUND), True
 

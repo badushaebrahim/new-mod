@@ -50,9 +50,9 @@ def my_content(request):
                     postserial = PostSerializer(postdata, many=True)
                     return Response(postserial.data, status=status.HTTP_200_OK)
                 return Response(status=status.HTTP_403_FORBIDDEN)
-            except postdata.DoesNotExist:
+            except posts.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
-        except userdata.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -80,7 +80,7 @@ def add_new_post(request):
                 return Response(newpostserial.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_403_FORBIDDEN)
-        except userdata.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_403_FORBIDDEN)
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -145,11 +145,11 @@ def get_seriallizer_of_post(id, request):
                 return serial,False
             # print("else")
             return Response(status=status.HTTP_403_FORBIDDEN),True
-        except userdata.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND),True
 
 
-    except postdata.DoesNotExist:
+    except posts.DoesNotExist:
         return Response("invalid post /post not found",status=status.HTTP_404_NOT_FOUND),True
 
 
@@ -169,11 +169,11 @@ def get_model_of_post(id,request):
                 return postdata,False
             # print("else")
             return Response(status=status.HTTP_403_FORBIDDEN),True
-        except userdata.DoesNotExist:
+        except CustomUser.DoesNotExist:
             # print("user not found")
             return Response("user not found",status=status.HTTP_404_NOT_FOUND),True
 
-    except postdata.DoesNotExist:
+    except posts.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND),True
 
 
@@ -200,15 +200,11 @@ def make_comment(request):
                     if newcommentserial.is_valid():
                         newcommentserial.save()
                         sent_mail2.delay("A user comented on your post ",ser.data["email"])
-                        # test("user comented on your post ",ser.data["email"])
-                        # if(res == "Done"):
                         return Response(newcommentserial.data,status=status.HTTP_200_OK)
-                    # print(newcommentserial.error_messages)
-                # print("199")
                 return Response( "user not atorized",  status=status.HTTP_403_FORBIDDEN)
-            except postobj.DoesNotExist:
+            except posts.DoesNotExist:
                 return Response(postser.errors,status=status.HTTP_404_NOT_FOUND)
-        except userobj.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response(ser.errors, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -269,9 +265,9 @@ def get_serializer_of_commnet(id, request):
                 return serial,False
                 # print("else")
             return Response(status=status.HTTP_403_FORBIDDEN), True
-        except userobj.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND), True
-    except commnetdata.DoesNotExist:
+    except comment.DoesNotExist:
         logging.warning(f"comment  not found of id{id}")
         return Response("comment  not found",status=status.HTTP_404_NOT_FOUND), True
 
@@ -288,12 +284,10 @@ def get_model_of_comment(id, request):
             userserial = LoginSerializer(userdata)
             if str(request.user) == userserial.data["first_name"]:
                 return commenttdata,False
-            # print("else")
             return Response(status=status.HTTP_403_FORBIDDEN), True
-        except userdata.DoesNotExist:
-            # print("user not found")
+        except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND), True
 
-    except commenttdata.DoesNotExist:
+    except comment.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND), True
         
