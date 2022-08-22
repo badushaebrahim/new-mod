@@ -17,10 +17,3 @@ class comment(models.Model):
     created_by = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     ofpost = models.ForeignKey(posts,on_delete=models.CASCADE)
-
-    @property
-    def comments(self):
-        '''this is propertuy used to list comment'''
-        instance = self
-        qs = comment.objects.filter(parent=instance)
-        return qs
